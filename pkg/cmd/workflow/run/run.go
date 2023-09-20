@@ -306,7 +306,11 @@ func runRun(opts *RunOptions) error {
 
 	body := bytes.NewReader(requestByte)
 
-	err = client.REST(repo.RepoHost(), "POST", path, body, nil)
+	var response struct {
+		WorkflowRunId int64 `json:"workflow_run_id"`
+	}
+
+	err = client.REST(repo.RepoHost(), "POST", path, body, &response)
 	if err != nil {
 		return fmt.Errorf("could not create workflow dispatch event: %w", err)
 	}
@@ -317,10 +321,15 @@ func runRun(opts *RunOptions) error {
 		fmt.Fprintf(out, "%s Created workflow_dispatch event for %s at %s\n",
 			cs.SuccessIcon(), cs.Cyan(workflow.Base()), cs.Bold(ref))
 
+		fmt.Fprintf(out, "Run: %s\n", cs.Bold(fmt.Sprintf("%d", response.WorkflowRunId)))
+
 		fmt.Fprintln(out)
 
 		fmt.Fprintf(out, "To see runs for this workflow, try: %s\n",
 			cs.Boldf("gh run list --workflow=%s", workflow.Base()))
+
+		fmt.Fprintf(out, "To watch this run, run: %s\n",
+			cs.Boldf("gh run watch %d", response.WorkflowRunId))
 	}
 
 	return nil
