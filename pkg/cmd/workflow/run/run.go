@@ -330,6 +330,9 @@ func runRun(opts *RunOptions) error {
 
 		fmt.Fprintf(out, "To watch this run, run: %s\n",
 			cs.Boldf("gh run watch %d", response.WorkflowRunId))
+	} else {
+		// Output run ID so it can be piped to other commands
+		fmt.Fprintf(opts.IO.Out, "%d", response.WorkflowRunId)
 	}
 
 	return nil
